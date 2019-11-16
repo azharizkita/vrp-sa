@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <script src="assets/js/jquery-3.4.1.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUdx_YdrwbdjQtCLnqK9U2SyIFj5IrgdM&callback=initMap"></script>
+</head>
+<style>
+  .table>tbody>tr>td {
+    vertical-align: middle;
+  }
+
+  #right-panel {
+    font-family: 'Roboto', 'sans-serif';
+    line-height: 30px;
+    padding-left: 10px;
+  }
+
+  #right-panel select,
+  #right-panel input {
+    font-size: 15px;
+  }
+
+  #right-panel select {
+    width: 100%;
+  }
+
+  #right-panel i {
+    font-size: 12px;
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #map {
+    width: 100%;
+    height: 60vh;
+  }
+</style>
+
+<body>
+
+  <div id="map"></div>
+
+  <table class="table text-center">
+    <thead class="thead thead-dark">
+      <tr id="theadList">
+        <th>Route</th>
+      </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+
+</body>
+<script defer>
+
+  objekWisata = {
+    0: {
+      name: 'Objek Wisata Tambalong',
+      address: 'Objek Wisata Tambalong, Mentirotiku, Rantepao, Kabupaten Toraja Utara, Sulawesi Selatan 91833'
+    },
+    1: {
+      name: 'Batu Mabusa',
+      address: 'Batu Mabusa, Buntu Barana, Tikala, Kabupaten Toraja Utara, Sulawesi Selatan 91833'
+    },
+    2: {
+      name: 'Objek Wisata Kalimbuang',
+      address: 'Objek Wisata Kalimbuang, Bori, Sesean, Kabupaten Toraja Utara, Sulawesi Selatan 91853'
+    },
+    3: {
+      name: 'To` Tombi',
+      address: 'To Tombi, Lolai, Kapala Pitu, Kabupaten Toraja Utara, Sulawesi Selatan 91854'
+    },
+    4: {
+      name: 'Lombok Parinding',
+      address: 'Lombok Parinding, Butu Lobo, Sesean, Kabupaten Toraja Utara, Sulawesi Selatan 91853'
+    },
+    5: {
+      name: 'Lo` Ko` Mata',
+      address: 'Lo Ko Mata, Sesean Matallo, Sesean Suloara, Kabupaten Toraja Utara, Sulawesi Selatan 91833'
+    },
+    6: {
+      name: 'Objek Wisata Batu Kianak',
+      address: 'Objek Wisata Batu Kianak, Sa do, Jl. Poros Sa dan Pebulian, Saalimbong adan, Sa dan, Kabupaten Toraja Utara, Sulawesi Selatan 91853'
+    },
+    7: {
+      name: 'Buntu Pune',
+      address: 'Buntu Pune, Ba tan, Kesu, Kabupaten Toraja Utara, Sulawesi Selatan 91834'
+    },
+    8: {
+      name: 'Ke` Te` Kesu`',
+      address: 'Ke Te Kesu, Pantanakan Lolo, Kesu, Kabupaten Toraja Utara, Sulawesi Selatan 91834'
+    },
+    9: {
+      name: 'Objek Wisata Palawa`',
+      address: 'Objek Wisata Palawa, Palawa, Sesean, Kabupaten Toraja Utara, Sulawesi Selatan 91853'
+    },
+    10: {
+      name: 'Museum Ne` gandeng',
+      address: 'Museum Ne gandeng, Museum Ne gandeng, Malakiri, North Toraja Regency, South Sulawesi'
+    },
+    11: {
+      name: 'Pana`',
+      address: 'Pana Oldest Child Grave Rock Cemetery, Suloara, Sesean Suloara, Kabupaten Toraja Utara, Sulawesi Selatan 91853'
+    },
+    12: {
+      name: 'Kawasan Wisata Tinimbayo',
+      address: 'Buntu, Lempo, Sesean Suloara, Kabupaten Toraja Utara, Sulawesi Selatan'
+    },
+    13: {
+      name: 'Sarambu Sikore',
+      address: 'Sarambu Sikore, Awan, Awan Rante Karua, Kabupaten Toraja Utara, Sulawesi Selatan 91856'
+    },
+    14: {
+      name: 'Londa',
+      address: 'Londa, Lembang Sangbua, Kesu, Tadongkon, Kesu, Kabupaten Toraja Utara, Sulawesi Selatan 91852'
+    },
+    15: {
+      name: 'Rante Karassik',
+      address: 'Rante Karassik, Karassik, Rantepao, Kabupaten Toraja Utara, Sulawesi Selatan 91834'
+    },
+    16: {
+      name: 'Terminal Makale',
+      address: 'Terminal Makale, Kamali Pentalluan, Makale, Tana Toraja Regency, South Sulawesi 91811'
+    },
+  }
+
+  var vehicle = {}
+  var waypts = [];
+  function initMap() {
+    $.get("http://azharizkita.pythonanywhere.com/", function (params) {
+
+      var VRPSA = params.split('-')
+      for (let i = 0; i < VRPSA.length; i++) {
+        postRoute = []
+        postTimeMin = []
+        postTimeMax = []
+        var tempVRPSA = VRPSA[i]
+        tempVRPSA = tempVRPSA.split('|')
+        if (tempVRPSA[0] != '' && tempVRPSA[0] != null) {
+
+          routeTemp = tempVRPSA[1].split(',')
+          for (let index = 0; index < routeTemp.length; index++) {
+            if (routeTemp[index] != '' && routeTemp[index] != null && routeTemp[index] != Object.keys(objekWisata).length - 1) {
+              postRoute.push(parseInt(routeTemp[index]))
+            }
+          }
+
+          timeMinTemp = tempVRPSA[2].split(',')
+          for (let index = 0; index < timeMinTemp.length; index++) {
+            if (timeMinTemp[index] != '' && timeMinTemp[index] != null && routeTemp[index] != Object.keys(objekWisata).length - 1) {
+              postTimeMin.push(parseInt(timeMinTemp[index]))
+            }
+          }
+
+          timeMaxTemp = tempVRPSA[3].split(',')
+          for (let index = 0; index < timeMaxTemp.length; index++) {
+            if (timeMaxTemp[index] != '' && timeMaxTemp[index] != null && routeTemp[index] != Object.keys(objekWisata).length - 1) {
+              postTimeMax.push(parseInt(timeMaxTemp[index]))
+            }
+          }
+
+          if (tempVRPSA[4] != 7) {
+            vehicle[tempVRPSA[0]] = {
+              'route': postRoute,
+              'timeMin': postTimeMin,
+              'timeMax': postTimeMax,
+              'travelTime': tempVRPSA[4]
+            }
+          }
+
+        }
+      }
+
+      var directionsService = new google.maps.DirectionsService;
+      var directionsRenderer = new google.maps.DirectionsRenderer;
+      var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 6,
+        center: new google.maps.LatLng(-1.9638452, 121.0589356)
+      });
+      directionsRenderer.setMap(map);
+
+      if (Object.keys(vehicle).length == 1) {
+        if (vehicle[parseInt(Object.keys(vehicle))].travelTime != 0) {
+          i = 1;
+          routeName = '<hr><li><strong>'+objekWisata[16].name+'</strong></li><hr>'
+          for (let j = 0; j < vehicle[parseInt(Object.keys(vehicle))].route.length; j++) {
+            routeName += '<li class="">'+objekWisata[vehicle[parseInt(Object.keys(vehicle))].route[j]].name + '</li><hr>'
+          }
+          routeName += '<hr><li><strong>'+objekWisata[16].name+'</strong></li><hr>'
+          $('table').find('tbody').append("<tr><td><ul style='width:100%;list-style-type:none;' class='btn btn-outline-danger' id='vehicleBtn" + parseInt(Object.keys(vehicle)) + "' data-vid='" + parseInt(Object.keys(vehicle)) + "'>" + routeName + "</ul></td></tr>");
+          document.getElementById('vehicleBtn' + parseInt(Object.keys(vehicle))).addEventListener('click', function (event) {
+            vehicleId = document.getElementById('vehicleBtn' + parseInt(Object.keys(vehicle))).getAttribute('data-vid')
+            calculateAndDisplayRoute(directionsService, directionsRenderer, vehicleId);
+          });
+          for (var j = 0; j < vehicle[parseInt(Object.keys(vehicle))].route.length; j++) {
+            if (vehicle[parseInt(Object.keys(vehicle))].route[j] != objekWisata.length) {
+              waypts.push({
+                location: objekWisata[vehicle[parseInt(Object.keys(vehicle))].route[j]].address,
+                stopover: true
+              });
+            }
+          }
+        }
+      } else {
+        var row = document.getElementById("theadList");
+        var x = row.insertCell(0);
+        x.innerHTML = "Route id";
+        for (let i = 0; i < Object.keys(vehicle).length; i++) {
+          if (vehicle[i].travelTime != 0) {
+            num = 1;
+            routeName = ''
+            for (let j = 0; j < vehicle[i].route.length; j++) {
+              routeName += objekWisata[vehicle[i].route[j]].name + ', '
+            }
+            $('table').find('tbody').append("<tr><td>" + num + "</td><td>" + routeName + "</td><td><input id='vehicleBtn" + i + "' type='button' class='btn btn-success' value='Show' data-vid='" + i + "'></td></tr>");
+            document.getElementById('vehicleBtn' + i).addEventListener('click', function (event) {
+              vehicleId = document.getElementById('vehicleBtn' + i).getAttribute('data-vid')
+              calculateAndDisplayRoute(directionsService, directionsRenderer, vehicleId);
+            });
+            num++
+            for (var j = 0; j < vehicle[vehicleId].route.length; j++) {
+              if (vehicle[vehicleId].route[j] != objekWisata.length) {
+                waypts.push({
+                  location: objekWisata[vehicle[vehicleId].route[j]].address,
+                  stopover: true
+                });
+              }
+            }
+          }
+        }
+      }
+      function calculateAndDisplayRoute(directionsService, directionsRenderer, vehicleId) {
+        directionsService.route({
+          origin: objekWisata[Object.keys(objekWisata).length - 1].address,
+          destination: objekWisata[Object.keys(objekWisata).length - 1].address,
+          waypoints: waypts,
+          optimizeWaypoints: true,
+          travelMode: 'WALKING'
+        }, function (response, status) {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      }
+
+    });
+  }
+</script>
+
+</html>
